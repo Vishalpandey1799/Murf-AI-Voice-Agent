@@ -18,9 +18,17 @@ class TextPayload(BaseModel):
 
 
 @app.get("/")
-def read_index():
-    return FileResponse("index.html")
+def get_homepage():
+    return FileResponse("index.html", media_type="text/html")
 
+
+@app.get("/style.css")
+def get_style():
+    return FileResponse("style.css", media_type="text/css")
+
+@app.get("/script.js")
+def get_script():
+    return FileResponse("script.js", media_type="application/javascript")
 
 @app.post("/generate-voice")
 def generate_voice(payload: TextPayload):
@@ -33,7 +41,7 @@ def generate_voice(payload: TextPayload):
 
     body = {
         "text": payload.text,
-        "voiceId": "en-US-terrell"
+        "voiceId": "en-US-ken"
     }
 
     response = requests.post(murf_url, headers=headers, json=body)
