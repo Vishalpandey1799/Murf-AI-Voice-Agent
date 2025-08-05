@@ -1,69 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voice Agent</title>
-     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-   
+
     <div class="orb orb1"></div>
     <div class="orb orb2"></div>
     <div class="orb orb3"></div>
 
     <div class="container">
-        <div class="header">
-            <h1>
-                <span class="microphone">🎙️</span>
-                Voice Agent
-            </h1>
-            <p class="subtitle">Transform your text into natural speech</p>
-        </div>
 
-        <div class="input-section">
-            <textarea 
-                id="textInput" 
-                placeholder="Type your message here and I'll speak it for you..."
-            ></textarea>
-        </div>
+        <!-- LEFT SIDE: Voice Agent -->
+        <div class="left-side">
+            <div class="header">
+                <h1>
+                    <span class="microphone">🎙️</span>
+                    Voice Agent
+                </h1>
+                <p class="subtitle">Transform your text into natural speech</p>
+            </div>
 
-        <div class="button-section">
-            <button id="playBtn" class="pulse">
-                <span id="buttonText">✨ Generate Voice</span>
-            </button>
-        </div>
+            <div class="input-section">
+                <textarea id="textInput" placeholder="Type your message here and I'll speak it for you..."></textarea>
+            </div>
 
-        <div class="loading" id="loading">
-            <div class="loading-dots">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+            <div class="button-section">
+                <button id="playBtn" class="pulse">
+                    <span id="buttonText">✨ Generate Voice</span>
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                🎉 Voice generated successfully!
+            </div>
+
+            <div class="audio-section" id="audioSection">
+                <audio id="audioPlayer" controls></audio>
             </div>
         </div>
 
-        <div class="success-message" id="successMessage">
-            🎉 Voice generated successfully!
+        <!-- RIGHT SIDE: Echo Bot -->
+        <div class="right-side">
+            <h3>Echo Bot</h3>
+            <button id="startAndstopBtn">Start Recording</button>
+            <audio id="recordedAudio" controls style="display:none; margin-top:10px;"></audio>
+
+            <div id="uploadInfo" class="upload-info" style="display: none;"></div>
+
         </div>
-
-        <div class="audio-section" id="audioSection">
-            <audio id="audioPlayer" controls></audio>
-
-
-        </div>
-
- 
-              <hr class="section-divider" />
-<div id="echo-bot">
-    <h3>Echo Bot</h3>
-    <button id="startAndstopBtn">Start Recording</button>
-    <audio id="recordedAudio" controls style="display:none; margin-top:10px;"></audio>
-</div>
 
     </div>
 
-  
-
-   <script src="/script.js"></script>
+    <script src="/script.js"></script>
 </body>
+
 </html>

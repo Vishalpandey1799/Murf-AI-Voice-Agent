@@ -8,6 +8,19 @@ const audioPlayer = document.getElementById('audioPlayer');
 const startAndstopBtn = document.getElementById("startAndstopBtn")
 
  
+
+async function uploadFile(audioblob){
+
+    const formdata = new FormData();
+    formdata.append("file" , audioblob)
+    const uploaded = await fetch("/upload", {
+        method: "POST",
+        body: formdata,
+    });
+
+    const response = await uploaded.json();
+    return response;
+}
 const placeholders = [
     "Type your message here and I'll speak it for you...",
     "Enter any text to convert to speech...",
@@ -27,6 +40,7 @@ setInterval(() => {
   let audioChunks = [];
   let isRecording = false;
   let stream;
+  let response = null;
 
  startAndstopBtn.addEventListener("click", async (e) => {
   e.preventDefault();
@@ -43,13 +57,33 @@ setInterval(() => {
         }
       };
 
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        recordedAudio.src = audioUrl;
-        recordedAudio.style.display = "block";
-        recordedAudio.play();
-      };
+     mediaRecorder.onstop = async () => {
+  const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+  const response = await uploadFile(audioBlob);  
+  
+  console.log(response)
+  const audioUrl = URL.createObjectURL(audioBlob);
+
+  recordedAudio.src = audioUrl;
+  recordedAudio.style.display = "block";
+  recordedAudio.play();
+ 
+  const infoHTML = `
+    <div class="upload-info-box">
+      <p>✅ ${response.message}</p>
+      <p><strong>File:</strong> ${response.filename}</p>
+      <p><strong>Size:</strong> ${(response.fileSize / 1024).toFixed(2)} KB</p>
+      <p><strong>Type:</strong> ${response.fileType}</p>
+    </div>
+  `;
+
+  document.getElementById("uploadInfo").innerHTML = infoHTML;
+  document.getElementById("uploadInfo").style.display = "block";
+};
+
+
+    
+  
 
       mediaRecorder.start();
       isRecording = true;
