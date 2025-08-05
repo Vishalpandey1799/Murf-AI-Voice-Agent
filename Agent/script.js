@@ -5,6 +5,7 @@ const loading = document.getElementById('loading');
 const successMessage = document.getElementById('successMessage');
 const audioSection = document.getElementById('audioSection');
 const audioPlayer = document.getElementById('audioPlayer');
+const startAndstopBtn = document.getElementById("startAndstopBtn")
 
  
 const placeholders = [
@@ -20,6 +21,56 @@ setInterval(() => {
         placeholderIndex = (placeholderIndex + 1) % placeholders.length;
     }
 }, 3000);
+
+
+ let mediaRecorder;
+  let audioChunks = [];
+  let isRecording = false;
+  let stream;
+
+ startAndstopBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  if (!isRecording) {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        recordedAudio.src = audioUrl;
+        recordedAudio.style.display = "block";
+        recordedAudio.play();
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      startAndstopBtn.textContent = "Stop Recording";
+      startAndstopBtn.classList.add("stillRecording");
+
+    } catch (err) {
+      alert("Microphone access denied or unavailable.");
+      console.error(err);
+    }
+  } else {
+    mediaRecorder.stop();
+    stream.getTracks().forEach(track => track.stop());
+    isRecording = false;
+    startAndstopBtn.textContent = "Start Recording";
+    startAndstopBtn.classList.remove("stillRecording");
+  }
+});
+ 
+
+ 
 
  
 playBtn.addEventListener('click', async () => {

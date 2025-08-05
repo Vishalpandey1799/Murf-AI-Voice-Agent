@@ -68,6 +68,7 @@
             text-align: center;
             position: relative;
             z-index: 10;
+            display: flex;
         }
 
         .header {
@@ -214,6 +215,15 @@
             }
         }
 
+        .section-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, #e2e8f0, #cbd5e0);
+    margin: 2rem 0;
+    opacity: 0.8;
+}
+
+
         .audio-section {
             opacity: 0;
             transform: translateY(20px);
@@ -263,3 +273,16 @@
             }
         }
  
+
+        .stillRecording {
+            background-color: red;
+        }
+
+        #echo-bot{
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid red;
+        }
