@@ -1,11 +1,9 @@
-# 🎙️ Murf AI Voice Agent Challenge – Day 1 to 5 Progress
+# 🎙️ Murf AI Voice Agent Challenge – Day 1 to 6 Progress
 
-Welcome to my journey through the **Murf AI Voice Agent 30-Day Challenge**!  
+Welcome to my journey through the **Murf AI Voice Agent 30-Day Challenge**!
 I'm building a smart and interactive **voice agent** using Murf AI's powerful TTS capabilities and integrating it with real-time tech like **AssemblyAI, FastAPI**, and **LLM APIs**.
 
 ---
-
-## ✅ Days Completed: 1 to 5
 
 ### 🗓️ Day 1 – Kickoff & Setup
 
@@ -17,7 +15,6 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ---
 
-### 🗓️ Day 2 – TTS API Integration
 ### 🗓️ Day 2 – TTS API Integration
 
 - 🔁 Connected **Murf's TTS API** to FastAPI backend
@@ -65,12 +62,25 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ---
 
+### 🗓️ Day 6 – Transcription Integration ✍️
+
+- 🧵 Created a new endpoint `/transcribe/file` on the FastAPI backend
+- 📤 This endpoint accepts an uploaded audio file and returns its **transcription**
+- 🖥️ Integrated the new transcription API into the frontend
+- 📜 Displayed the **transcribed text** dynamically in the UI after recording upload
+- ⏳ Added a **"Transcribing..."** status message while waiting for the result
+- 🧠 Now I have full flow: **record voice → upload audio → transcribe → display text**
+- 🚀 This brings the project one step closer to **real voice-based interaction**
+
+---
+
 ## ⚙️ What You’ll Need to Build This (So Far)
 
 To build your own voice agent or Echo Bot like this, you’ll need:
 
 - ✅ **FastAPI** – For serving APIs
 - ✅ **Murf AI account** – To get your TTS API key
+- ✅ **AssemblyAI / other transcription API** – For speech-to-text
 - ✅ **Browser with MediaRecorder API support** – Chrome, Firefox, etc.
 - ✅ **Basic frontend setup** – HTML, CSS, JS
 - ✅ **Python + pip** – For installing FastAPI and other packages
@@ -81,13 +91,14 @@ To build your own voice agent or Echo Bot like this, you’ll need:
 
 ## 💡 Tools I'm Using
 
-| Tool          | Purpose                             |
-| ------------- | ----------------------------------- |
-| Murf AI       | Text-to-Speech (TTS)                |
-| FastAPI       | Backend API server                  |
-| HTML/CSS/JS   | UI for interaction and playback     |
-| MediaRecorder | Echo Bot mic capture + playback     |
-| FormData      | Uploading audio blob to the backend |
+| Tool             | Purpose                             |
+| ---------------- | ----------------------------------- |
+| Murf AI          | Text-to-Speech (TTS)                |
+| FastAPI          | Backend API server                  |
+| HTML/CSS/JS      | UI for interaction and playback     |
+| MediaRecorder    | Echo Bot mic capture + playback     |
+| FormData         | Uploading audio blob to the backend |
+| AssemblyAI / STT | Transcribing recorded audio         |
 
 ---
 

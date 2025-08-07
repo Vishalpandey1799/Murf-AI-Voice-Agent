@@ -18,9 +18,40 @@ async function uploadFile(audioblob){
         body: formdata,
     });
 
+
     const response = await uploaded.json();
-    return response;
+
+
+    return response
+
+
+    
 }
+
+async function transcription(filename) {
+    const response = await fetch("/transcribe/file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename })
+    });
+
+   
+    const data = await response.json();
+
+    if (!response.ok) {
+        alert("Transcription failed: " + data.detail);
+        return;
+    }
+
+
+    document.querySelector(".transcript-box").style.opacity = "1";
+  const transcriptBox = document.getElementById("transcriptDisplay");
+    transcriptBox.textContent = data.transcript;
+     
+}
+
+
+ 
 const placeholders = [
     "Type your message here and I'll speak it for you...",
     "Enter any text to convert to speech...",
@@ -79,6 +110,9 @@ setInterval(() => {
 
   document.getElementById("uploadInfo").innerHTML = infoHTML;
   document.getElementById("uploadInfo").style.display = "block";
+
+  await transcription(response.filename)
+  
 };
 
 

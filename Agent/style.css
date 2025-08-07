@@ -328,3 +328,12 @@ audio {
         transform: translateY(0);
     }
 }
+
+.transcript-box {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+
+}

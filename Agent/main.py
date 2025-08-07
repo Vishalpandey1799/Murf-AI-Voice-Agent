@@ -6,16 +6,22 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
+import assemblyai as aai
 
 load_dotenv()
 
 MURF_API_KEY = os.getenv("MURF_API_KEY")
+aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
 
 app = FastAPI()
 
 
 class TextPayload(BaseModel):
     text: str
+
+
+class TranscribeRequest(BaseModel):
+    filename: str
 
 
 @app.get("/")
@@ -71,8 +77,6 @@ def upload_audio(file: UploadFile = File(...)):
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
-    
-
     ext = file.content_type.split("/")[1]
     print
     filename = f"{int(time.time())}.{ext}"
@@ -87,3 +91,30 @@ def upload_audio(file: UploadFile = File(...)):
         "fileType": file.content_type,
         "message": "File uploaded successfully"
     }
+
+
+@app.post("/transcribe/file")
+def transcribe_file(data: TranscribeRequest):
+    print(data)
+    filename = data.filename
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    config = aai.TranscriptionConfig(speech_model=aai.SpeechModel.best)
+
+    try:
+        transcript = aai.Transcriber(config=config).transcribe(filepath)
+       
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Transcription failed: {str(e)}")
+
+    if transcript.status == "error":
+        raise HTTPException(
+            status_code=500, detail=f"AssemblyAI error: {transcript.error}")
+
+    return {"transcript": transcript.text
+           
+            }
