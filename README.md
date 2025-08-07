@@ -68,7 +68,6 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 - 📤 This endpoint accepts an uploaded audio file and returns its **transcription**
 - 🖥️ Integrated the new transcription API into the frontend
 - 📜 Displayed the **transcribed text** dynamically in the UI after recording upload
-- ⏳ Added a **"Transcribing..."** status message while waiting for the result
 - 🧠 Now I have full flow: **record voice → upload audio → transcribe → display text**
 - 🚀 This brings the project one step closer to **real voice-based interaction**
 
