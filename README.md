@@ -73,14 +73,23 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ---
 
-### 🗓️ Day 7 – Real-Time Voice Generation ⏳🎙️
+### 🗓️ Day 7 – Voice-to-Voice with /tts/echo Endpoint 🎤🔄🎙️
 
-- ⚡ Added a **loading animation + status message** when generating voice after recording
-- ⏺️ Optimized the **record → send → assemblyAI → trancript - murf - audio_url** pipeline for faster response
-- 🔊 Automatically **plays generated voice** as soon as Murf AI returns it
-- 🧼 Cleaned up unused frontend JS code to make the project leaner and easier to maintain
-- 🔄 Improved the Echo Bot UX with a clear “Generating voice…” phase
-- 🚀 The interaction now feels much more **fluid and human-like**
+- 🆕 Created a new backend endpoint **`/tts/echo`** in FastAPI
+- 🎙️ This endpoint:
+  1. Accepts an **audio file** from the client
+  2. Uses **AssemblyAI** to transcribe the speech to text
+  3. Sends the transcription to **Murf AI** to generate **a new voice**
+  4. Saves the generated voice file and returns its **URL** to the client
+- 🎧 On the client side:
+  - After recording stops, the recorded audio is sent to `/tts/echo`
+  - The returned **Murf voice URL** is set as the `<audio>` source
+  - The new voice plays automatically
+- 🔄 Now we have a **full voice-to-voice pipeline**:
+
+  **User speaks → Server transcribes → Murf re-voices → Client plays**
+
+- 🚀 This makes the Echo Bot truly interactive and feels like talking to a real AI agent
 
 ---
 
