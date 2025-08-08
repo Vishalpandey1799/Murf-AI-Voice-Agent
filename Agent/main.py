@@ -11,7 +11,8 @@ import assemblyai as aai
 load_dotenv()
 
 MURF_API_KEY = os.getenv("MURF_API_KEY")
-aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
+aai.settings.api_key = os.getenv(
+    "ASSEMBLYAI_API_KEY")
 
 app = FastAPI()
 
@@ -39,82 +40,46 @@ def get_script():
     return FileResponse("script.js", media_type="application/javascript")
 
 
-@app.post("/generate-voice")
-def generate_voice(payload: TextPayload):
-
-    murf_url = "https://api.murf.ai/v1/speech/generate"
-
-    headers = {
-        "api-key": MURF_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    body = {
-        "text": payload.text,
-        "voiceId": "en-US-ken"
-    }
-
-    response = requests.post(murf_url, headers=headers, json=body)
-    print(response.json())
-
-    if response.status_code == 200:
-        audio_url = response.json().get("audioFile")
-        return {"audio_url": audio_url}
-    else:
-        print("Error:", response.text)
-        raise HTTPException(
-            status_code=500, detail=f"Murf API failed: {response.text}")
-
-
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-
-@app.post("/upload")
-def upload_audio(file: UploadFile = File(...)):
+@app.post("/tts/echo")
+async def tts_echo(file: UploadFile = File(...)):
     allowed_types = ["audio/mp3", "audio/webm", "audio/wav", "audio/ogg"]
-
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
-    ext = file.content_type.split("/")[1]
-    print
-    filename = f"{int(time.time())}.{ext}"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-
-    with open(filepath, "wb") as buffer:
-        buffer.write(file.file.read())
-
-    return {
-        "filename": filename,
-        "fileSize": os.path.getsize(filepath),
-        "fileType": file.content_type,
-        "message": "File uploaded successfully"
-    }
-
-
-@app.post("/transcribe/file")
-def transcribe_file(data: TranscribeRequest):
-    print(data)
-    filename = data.filename
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File not found")
-
-    config = aai.TranscriptionConfig(speech_model=aai.SpeechModel.best)
-
     try:
-        transcript = aai.Transcriber(config=config).transcribe(filepath)
-       
+        # Read audio in memory
+        audio_bytes = await file.read()
+
+        # Transcribe with AssemblyAI directly from bytes
+        transcriber = aai.Transcriber()
+        transcript = transcriber.transcribe(audio_bytes)
+
+        print(transcript)
+        if transcript.status == "error":
+            raise HTTPException(
+                status_code=500, detail=f"AssemblyAI error: {transcript.error}")
+
+        text = transcript.text
+
+        # Send transcript to Murf API
+        murf_url = "https://api.murf.ai/v1/speech/generate"
+        headers = {
+            "api-key": MURF_API_KEY,
+            "Content-Type": "application/json"
+        }
+        body = {
+            "text": text,
+            "voiceId": "en-US-ken"
+        }
+
+        murf_response = requests.post(murf_url, headers=headers, json=body)
+
+        if murf_response.status_code != 200:
+            raise HTTPException(
+                status_code=500, detail=f"Murf API failed: {murf_response.text}")
+
+        audio_url = murf_response.json().get("audioFile")
+        return {"audio_url": audio_url}
+
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Transcription failed: {str(e)}")
-
-    if transcript.status == "error":
-        raise HTTPException(
-            status_code=500, detail=f"AssemblyAI error: {transcript.error}")
-
-    return {"transcript": transcript.text
-           
-            }
+        raise HTTPException(status_code=500, detail=str(e))

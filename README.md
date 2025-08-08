@@ -1,4 +1,4 @@
-# 🎙️ Murf AI Voice Agent Challenge – Day 1 to 6 Progress
+# 🎙️ Murf AI Voice Agent Challenge – Day 1 to 7 Progress
 
 Welcome to my journey through the **Murf AI Voice Agent 30-Day Challenge**!
 I'm building a smart and interactive **voice agent** using Murf AI's powerful TTS capabilities and integrating it with real-time tech like **AssemblyAI, FastAPI**, and **LLM APIs**.
@@ -70,6 +70,17 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 - 📜 Displayed the **transcribed text** dynamically in the UI after recording upload
 - 🧠 Now I have full flow: **record voice → upload audio → transcribe → display text**
 - 🚀 This brings the project one step closer to **real voice-based interaction**
+
+---
+
+### 🗓️ Day 7 – Real-Time Voice Generation ⏳🎙️
+
+- ⚡ Added a **loading animation + status message** when generating voice after recording
+- ⏺️ Optimized the **record → send → assemblyAI → trancript - murf - audio_url** pipeline for faster response
+- 🔊 Automatically **plays generated voice** as soon as Murf AI returns it
+- 🧼 Cleaned up unused frontend JS code to make the project leaner and easier to maintain
+- 🔄 Improved the Echo Bot UX with a clear “Generating voice…” phase
+- 🚀 The interaction now feels much more **fluid and human-like**
 
 ---
 
