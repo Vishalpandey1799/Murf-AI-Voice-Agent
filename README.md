@@ -93,6 +93,33 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ---
 
+# 🚀 Day 8 — Building LLM Query Endpoint with FastAPI
+
+## 📅 Overview
+On **Day 8** of my Generative AI learning journey, I focused on creating a new FastAPI endpoint that accepts text input, queries an LLM (Google Gemini API), and returns an AI-generated response in JSON format.  
+This marks a key step towards integrating AI into APIs for use in chatbots, voice assistants, and other applications.
+
+---
+
+## 🛠 Features Implemented
+- **POST `/llm/query` endpoint**:
+  - Accepts a JSON payload containing a `text` field.
+  - Passes the input to an LLM (Google Gemini API).
+  - Returns the AI's response in JSON format.
+
+- **LLM Integration**:
+  - Used Google’s **`gemini-1.5-flash`** model for fast response generation.
+  - Implemented error handling for model name mismatches and API issues.
+
+- **Code Modularization**:
+  - Created a `getResponseFromGemini()` helper function for cleaner code.
+  - Isolated API logic from route handling.
+
+---
+
+ 
+
+
 ## ⚙️ What You’ll Need to Build This (So Far)
 
 To build your own voice agent or Echo Bot like this, you’ll need:

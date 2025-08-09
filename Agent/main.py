@@ -1,3 +1,4 @@
+import google.generativeai as genai
 from fastapi import FastAPI, HTTPException, File, UploadFile
 import time
 from fastapi.responses import FileResponse, JSONResponse
@@ -40,6 +41,35 @@ def get_script():
     return FileResponse("script.js", media_type="application/javascript")
 
 
+genai.configure(api_key=os.getenv("GEMINI_API_KEY")
+                ) 
+
+
+def getReponsefromGemini(prompt: str) -> str:
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return "Sorry, I couldn't process that."
+
+
+@app.post("/llm/query")
+async def llm_query(payload: TextPayload):
+    try:
+
+        ai_reply = getReponsefromGemini(payload.text)
+        print(ai_reply)
+
+        return {
+            "input": payload.text,
+            "response": ai_reply
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/tts/echo")
 async def tts_echo(file: UploadFile = File(...)):
     allowed_types = ["audio/mp3", "audio/webm", "audio/wav", "audio/ogg"]
@@ -47,10 +77,9 @@ async def tts_echo(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file type")
 
     try:
-        # Read audio in memory
+
         audio_bytes = await file.read()
 
-        # Transcribe with AssemblyAI directly from bytes
         transcriber = aai.Transcriber()
         transcript = transcriber.transcribe(audio_bytes)
 
