@@ -13,7 +13,7 @@ load_dotenv()
 
 MURF_API_KEY = os.getenv("MURF_API_KEY")
 aai.settings.api_key = os.getenv(
-    "ASSEMBLYAI_API_KEY")
+    "ASSEMBLYAI_API_KEY")  
 
 app = FastAPI()
 
@@ -42,7 +42,7 @@ def get_script():
 
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY")
-                ) 
+                )  
 
 
 def getReponsefromGemini(prompt: str) -> str:
@@ -54,23 +54,10 @@ def getReponsefromGemini(prompt: str) -> str:
         print(f"Gemini error: {e}")
         return "Sorry, I couldn't process that."
 
+ 
+
 
 @app.post("/llm/query")
-async def llm_query(payload: TextPayload):
-    try:
-
-        ai_reply = getReponsefromGemini(payload.text)
-        print(ai_reply)
-
-        return {
-            "input": payload.text,
-            "response": ai_reply
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/tts/echo")
 async def tts_echo(file: UploadFile = File(...)):
     allowed_types = ["audio/mp3", "audio/webm", "audio/wav", "audio/ogg"]
     if file.content_type not in allowed_types:
@@ -90,6 +77,10 @@ async def tts_echo(file: UploadFile = File(...)):
 
         text = transcript.text
 
+        ai_reply = getReponsefromGemini(text)
+
+        print(ai_reply)
+
         # Send transcript to Murf API
         murf_url = "https://api.murf.ai/v1/speech/generate"
         headers = {
@@ -97,11 +88,12 @@ async def tts_echo(file: UploadFile = File(...)):
             "Content-Type": "application/json"
         }
         body = {
-            "text": text,
+            "text": ai_reply,
             "voiceId": "en-US-ken"
         }
 
         murf_response = requests.post(murf_url, headers=headers, json=body)
+        print(murf_response.json())
 
         if murf_response.status_code != 200:
             raise HTTPException(

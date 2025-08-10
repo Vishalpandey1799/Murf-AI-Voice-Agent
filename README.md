@@ -96,18 +96,22 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 # 🚀 Day 8 — Building LLM Query Endpoint with FastAPI
 
 ## 📅 Overview
+
 On **Day 8** of my Generative AI learning journey, I focused on creating a new FastAPI endpoint that accepts text input, queries an LLM (Google Gemini API), and returns an AI-generated response in JSON format.  
 This marks a key step towards integrating AI into APIs for use in chatbots, voice assistants, and other applications.
 
 ---
 
 ## 🛠 Features Implemented
+
 - **POST `/llm/query` endpoint**:
+
   - Accepts a JSON payload containing a `text` field.
   - Passes the input to an LLM (Google Gemini API).
   - Returns the AI's response in JSON format.
 
 - **LLM Integration**:
+
   - Used Google’s **`gemini-1.5-flash`** model for fast response generation.
   - Implemented error handling for model name mismatches and API issues.
 
@@ -117,8 +121,33 @@ This marks a key step towards integrating AI into APIs for use in chatbots, voic
 
 ---
 
- 
+# 🎙️ Day 9 /llm/query — Audio-to-Audio AI Endpoint
 
+## Overview
+
+The `/llm/query` endpoint accepts **audio recordings** from the client, transcribes them into text, generates a response using an **LLM API**, converts that response into speech with **Murf.ai**, and returns the audio file to be played in the browser.
+
+## Flow
+
+1. **Frontend:**
+
+   - User clicks "Start Recording" → audio captured via `MediaRecorder`.
+   - On "Stop Recording" → send audio file to `/llm/query`.
+
+2. **Backend:**
+
+   - Receive audio as `multipart/form-data`.
+   - Send to **AssemblyAI** for transcription.
+   - Pass transcription text to **GEMINI** for response generation.
+   - Send LLM response text to **Murf** for TTS.
+   - Return generated audio file to client.
+
+3. **Frontend Playback:**
+   - Receive audio_url from server.
+   - Create `audio` element and set `src` to blob URL.
+   - Play the response instantly.
+
+---
 
 ## ⚙️ What You’ll Need to Build This (So Far)
 

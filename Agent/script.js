@@ -10,9 +10,9 @@ let audioChunks = [];
 let isRecording = false;
 let stream;
 
-async function transcriptToaudio(formdata) {
+async function endtoendAudio(formdata) {
     try {
-        const response = await fetch("/tts/echo", {
+        const response = await fetch("/llm/query", {
             method: "POST",
             body: formdata
         });
@@ -22,6 +22,7 @@ async function transcriptToaudio(formdata) {
         }
 
         const data = await response.json();
+        console.log(data)
         return data;
     } catch (error) {
         console.error("Error from transcribe to audio:", error.message);
@@ -55,7 +56,7 @@ startAndstopBtn.addEventListener("click", async (e) => {
                 formdata.append("file", audioBlob);
 
                
-                const { audio_url } = await transcriptToaudio(formdata);
+                const { audio_url } = await endtoendAudio(formdata);
                 console.log(audio_url)
 
                 // Hide loading & show success
