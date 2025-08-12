@@ -149,6 +149,42 @@ The `/llm/query` endpoint accepts **audio recordings** from the client, transcri
 
 ---
 
+# 🎙Day 10
+
+## 📌 Overview
+
+Today’s milestone: implementing **session-based chat history** so the AI assistant remembers previous conversation turns in the same session.
+
+With this update, the assistant now maintains context between messages, resulting in more natural, relevant, and human-like responses.
+
+---
+
+## 🛠 Tech Stack
+
+- **Backend**: FastAPI (Python)
+- **Speech-to-Text**: [AssemblyAI](https://www.assemblyai.com/)
+- **LLM**: Google Gemini API
+- **Text-to-Speech**: [Murf AI](https://murf.ai/)
+- **Frontend**: HTML, CSS, Vanilla JavaScript
+
+---
+
+## 🚀 Features Implemented Today
+
+- **Session Memory** – Stores conversations in an in-memory dictionary keyed by `session_id`.
+- **New API Endpoint** – `POST /agent/chat/{session_id}`:
+  1. Accepts audio file from the browser.
+  2. Transcribes speech with AssemblyAI.
+  3. Appends the user message to the session’s chat history.
+  4. Sends the full history to Gemini for context-aware replies.
+  5. Saves the assistant’s reply back to the history.
+  6. Converts the reply to speech with Murf AI.
+- **Frontend Update**:
+  - Persists `session_id` in the URL query parameter.
+  - Automatically starts recording after the AI finishes speaking for hands-free conversations.
+
+---
+
 ## ⚙️ What You’ll Need to Build This (So Far)
 
 To build your own voice agent or Echo Bot like this, you’ll need:
@@ -190,3 +226,25 @@ Your tools are enabling the next generation of interactive agents 💜
 Let’s build cool voice stuff together!
 
 ---
+
+## 30 Days of AI Voice Agents | Day 10: Chat History @everyone @here
+
+Today, you will be building a chat history feature so that the LLM remembers the previous messages in the conversation.
+
+The chat history will be stored in a datastore. You are free to use any prototype-friendly datastore you want. You can even use a simple in-memory dictionary that is a global variable in the python server, just make sure to run only one FastAPI worker process.
+
+Create a new endpoint POST /agent/chat/{session_id} that will accept audio as input. The session id will be used to store the chat history in the datastore. When the user sends a new message, previous messages in the session are fetched and combined with the new message to be sent to the LLM API. The response from the LLM API is then stored in the chat history and returned to the user.
+
+POST /agent/chat/{session_id} follows the same pattern as POST /llm/query on Day 9, with the addition of chat history (User query in audio -> STT -> append transcript to chat history -> LLM -> add response to chat history -> TTS -> Audio Output)
+
+Update the UI to store the session id as a query param in the URL, and also to start recording the user's voice right after an LLM response is played through to the end.
+
+You should have a complete working conversational bot by the end of this task.
+
+Have a brief conversation with your conversational bot and post the video on LinkedIn.
+
+**Instructions:**
+
+📌 Complete the task, and post on LinkedIn BEFORE 10 AM IST tomorrow.
+
+📌 Submit here after you are done: https://forms.gle/Vqkt7QguEcHybh7RA

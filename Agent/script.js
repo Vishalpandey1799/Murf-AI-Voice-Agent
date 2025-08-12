@@ -10,25 +10,44 @@ let audioChunks = [];
 let isRecording = false;
 let stream;
 
+
+ 
+function getSessionId() {
+    const params = new URLSearchParams(window.location.search);
+    let id = params.get("session");
+    if (!id) {
+        id = crypto.randomUUID();
+        params.set("session", id);
+        window.history.replaceState({}, "", `${location.pathname}?${params}`);
+    }
+    return id;
+}
+const sessionId = getSessionId();
+
 async function endtoendAudio(formdata) {
     try {
-        const response = await fetch("/llm/query", {
+        const response = await fetch(`/agent/chat/${sessionId}`, {
             method: "POST",
             body: formdata
         });
-
-        if (!response.ok) {
-            throw new Error("Failed to generate audio");
-        }
+        if (!response.ok) throw new Error("Failed to generate audio");
 
         const data = await response.json();
-        console.log(data)
+        console.log("Chat History:", data.history);
+
         return data;
     } catch (error) {
         console.error("Error from transcribe to audio:", error.message);
         alert("An error occurred while generating the voice.");
     }
 }
+
+ 
+recordedAudio.addEventListener("ended", () => {
+    startAndstopBtn.click(); 
+});
+
+
 
 startAndstopBtn.addEventListener("click", async (e) => {
     e.preventDefault();

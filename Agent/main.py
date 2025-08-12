@@ -41,66 +41,79 @@ def get_script():
     return FileResponse("script.js", media_type="application/javascript")
 
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY")
-                )  
+chat_store = {}
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+                 
 
 
-def getReponsefromGemini(prompt: str) -> str:
+def getReponsefromGemini(conversation_history: list) -> str:
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+
+        
+        messages = []
+        for msg in conversation_history:
+            role = "user" if msg["role"] == "user" else "model"
+            messages.append({"role": role, "parts": [msg["text"]]})
+
+        response = model.generate_content(messages)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini error: {e}")
         return "Sorry, I couldn't process that."
 
- 
 
-
-@app.post("/llm/query")
-async def tts_echo(file: UploadFile = File(...)):
+@app.post("/agent/chat/{session_id}")
+async def chat_with_history(session_id: str, file: UploadFile = File(...)):
     allowed_types = ["audio/mp3", "audio/webm", "audio/wav", "audio/ogg"]
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
     try:
-
+        # 1. Transcribe audio
         audio_bytes = await file.read()
-
         transcriber = aai.Transcriber()
         transcript = transcriber.transcribe(audio_bytes)
 
-        print(transcript)
         if transcript.status == "error":
             raise HTTPException(
                 status_code=500, detail=f"AssemblyAI error: {transcript.error}")
 
-        text = transcript.text
+        user_message = {"role": "user", "text": transcript.text}
 
-        ai_reply = getReponsefromGemini(text)
+        # 2. Manage conversation history
+        if session_id not in chat_store:
+            chat_store[session_id] = []
 
-        print(ai_reply)
+        chat_store[session_id].append(user_message)
 
-        # Send transcript to Murf API
-        murf_url = "https://api.murf.ai/v1/speech/generate"
-        headers = {
-            "api-key": MURF_API_KEY,
-            "Content-Type": "application/json"
-        }
-        body = {
-            "text": ai_reply,
-            "voiceId": "en-US-ken"
-        }
+        # 3. Get AI response with full context
+        ai_reply = getReponsefromGemini(chat_store[session_id])
+        assistant_message = {"role": "assistant", "text": ai_reply}
+        chat_store[session_id].append(assistant_message)
 
-        murf_response = requests.post(murf_url, headers=headers, json=body)
-        print(murf_response.json())
+        # 4. Generate speech
+        murf_response = requests.post(
+            "https://api.murf.ai/v1/speech/generate",
+            headers={
+                "api-key": MURF_API_KEY,
+                "Content-Type": "application/json"
+            },
+            json={
+                "text": ai_reply,
+                "voiceId": "en-US-ken"
+            }
+        )
 
         if murf_response.status_code != 200:
             raise HTTPException(
                 status_code=500, detail=f"Murf API failed: {murf_response.text}")
 
-        audio_url = murf_response.json().get("audioFile")
-        return {"audio_url": audio_url}
+        return {
+            "audio_url": murf_response.json().get("audioFile"),
+            "text": ai_reply,
+            "history": chat_store[session_id]
+        }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
