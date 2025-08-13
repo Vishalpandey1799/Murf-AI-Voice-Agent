@@ -1,113 +1,126 @@
-const startAndstopBtn = document.getElementById("startAndstopBtn");
-const recordedAudio = document.getElementById("recordedAudio");
-const loading = document.getElementById("loading");
-const successMessage = document.getElementById("successMessage");
-const audioSection = document.getElementById("audioSection");
-const audioPlayer = document.getElementById("audioPlayer");
+  
+        const startAndstopBtn = document.getElementById('startAndstopBtn');
+        const chatLog = document.getElementById('chat-log');
+        const loadingIndicator = document.getElementById('loading');
 
-let mediaRecorder;
-let audioChunks = [];
-let isRecording = false;
-let stream;
+     
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let stream;
 
+     
 
- 
-function getSessionId() {
-    const params = new URLSearchParams(window.location.search);
-    let id = params.get("session");
-    if (!id) {
-        id = crypto.randomUUID();
-        params.set("session", id);
-        window.history.replaceState({}, "", `${location.pathname}?${params}`);
-    }
-    return id;
-}
-const sessionId = getSessionId();
-
-async function endtoendAudio(formdata) {
-    try {
-        const response = await fetch(`/agent/chat/${sessionId}`, {
-            method: "POST",
-            body: formdata
-        });
-        if (!response.ok) throw new Error("Failed to generate audio");
-
-        const data = await response.json();
-        console.log("Chat History:", data.history);
-
-        return data;
-    } catch (error) {
-        console.error("Error from transcribe to audio:", error.message);
-        alert("An error occurred while generating the voice.");
-    }
-}
-
- 
-recordedAudio.addEventListener("ended", () => {
-    startAndstopBtn.click(); 
-});
-
-
-
-startAndstopBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    if (!isRecording) {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunks.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = async () => {
-                // Show loading state
-                loading.style.display = "block";
-                successMessage.classList.remove("show");
-                recordedAudio.style.display = "none";
-
-                const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-                let formdata = new FormData();
-                formdata.append("file", audioBlob);
-
-               
-                const { audio_url } = await endtoendAudio(formdata);
-                console.log(audio_url)
-
-                // Hide loading & show success
-                loading.style.display = "none";
-                successMessage.classList.add("show");
-
-                successMessage.style.opacity = 1;
-
-                // Play the generated audio
-                recordedAudio.src = audio_url;
-                recordedAudio.style.display = "block";
-                recordedAudio.play();
-
-                setTimeout(() => {
-                    successMessage.classList.remove("show");
-                }, 3000);
-            };
-
-            mediaRecorder.start();
-            isRecording = true;
-            startAndstopBtn.textContent = "Stop Recording";
-            startAndstopBtn.classList.add("stillRecording");
-
-        } catch (err) {
-            alert("Microphone access denied or unavailable.");
-            console.error(err);
+     
+        function getSessionId() {
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get("session");
+            if (!id) {
+                id = crypto.randomUUID();
+                params.set("session", id);
+                window.history.replaceState({}, "", `${location.pathname}?${params}`);
+            }
+            return id;
         }
-    } else {
-        mediaRecorder.stop();
-        stream.getTracks().forEach(track => track.stop());
-        isRecording = false;
-        startAndstopBtn.textContent = "Start Recording";
-        startAndstopBtn.classList.remove("stillRecording");
-    }
-});
+        const sessionId = getSessionId();
+  
+ 
+        function addAudioMessage(audioUrl, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', type);
+
+            const audioPlayer = document.createElement('audio');
+            audioPlayer.controls = true;
+            audioPlayer.src = audioUrl;
+
+            messageDiv.appendChild(audioPlayer);
+            chatLog.appendChild(messageDiv);
+
+            if (type === 'received') {
+                audioPlayer.play();
+            }
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+      
+        async function endtoendAudio(formdata) {
+            try {
+                loadingIndicator.style.display = "flex";
+ 
+                const response = await fetch(`/agent/chat/${sessionId}`, {
+                    method: "POST",
+                    body: formdata
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log("Chat History:", data.history);
+                return data;
+
+            } catch (error) {
+                console.error("Error from transcribe to audio:", error.message);
+                addTextMessage(`Error: ${error.message}`, 'error');
+            } finally {
+                loadingIndicator.style.display = "none";
+            }
+        }
+
+      
+        startAndstopBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+
+            if (!isRecording) {
+              
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        
+                        
+                        addAudioMessage(audioUrl, 'sent');
+
+                      
+                        let formdata = new FormData();
+                        formdata.append("file", audioBlob, "recording.webm");
+
+                        const result = await endtoendAudio(formdata);
+
+                     
+                        if (result?.audio_url) {
+                            addAudioMessage(result.audio_url, 'received');
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    startAndstopBtn.textContent = "Stop Recording";
+                    startAndstopBtn.classList.add("recording");
+
+                } catch (err) {
+                    addTextMessage("Microphone access denied. Please allow microphone permissions in your browser settings.", "error");
+                    console.error(err);
+                }
+            } else {
+               
+                mediaRecorder.stop();
+                stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                startAndstopBtn.textContent = "Start Recording";
+                startAndstopBtn.classList.remove("recording");
+            }
+        });
+ 

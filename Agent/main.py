@@ -13,7 +13,7 @@ load_dotenv()
 
 MURF_API_KEY = os.getenv("MURF_API_KEY")
 aai.settings.api_key = os.getenv(
-    "ASSEMBLYAI_API_KEY")  
+    "ASSEMBLYAI_API_KEY")
 
 app = FastAPI()
 
@@ -42,15 +42,14 @@ def get_script():
 
 
 chat_store = {}
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-                 
+genai.configure(api_key=os.getenv("GEMINI_API_KEY")
+                )  
 
 
 def getReponsefromGemini(conversation_history: list) -> str:
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
 
-        
         messages = []
         for msg in conversation_history:
             role = "user" if msg["role"] == "user" else "model"

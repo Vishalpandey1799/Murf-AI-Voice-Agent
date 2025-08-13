@@ -185,6 +185,32 @@ With this update, the assistant now maintains context between messages, resultin
 
 ---
 
+---
+
+## Day11
+
+-- Error handling
+
+---
+
+# day 12 Conversational Agent — Revamped UI 🎙️
+
+A sleek, minimal, and interactive conversational agent UI for real-time voice-based communication.
+
+## 🚀 Features
+
+- **One-Tap Recording**: Combined "Start Recording" and "Stop Recording" into a single smart toggle button.
+- **Automatic Audio Playback**: Audio plays automatically once it’s loaded — no need for a player.
+- **Clean Interface**: Removed extra sections like initial TTS and echo bot content.
+- **Animated Record Button**: Added visual feedback with animation for better UX.
+- **Responsive Design**: Works seamlessly on desktop and mobile.
+
+## 📸 UI Preview
+
+![alt text](image.png)
+
+---
+
 ## ⚙️ What You’ll Need to Build This (So Far)
 
 To build your own voice agent or Echo Bot like this, you’ll need:
