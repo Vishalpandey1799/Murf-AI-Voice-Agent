@@ -58,171 +58,116 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 - 🔔 Added a real-time **status message on UI** after upload
 - 🔃 Improved end-to-end interactivity from mic → server → playback
-- 🔥 Feels like I’m building the foundation for a real voice assistant!
 
 ---
 
 ### 🗓️ Day 6 – Transcription Integration ✍️
 
-- 🧵 Created a new endpoint `/transcribe/file` on the FastAPI backend
-- 📤 This endpoint accepts an uploaded audio file and returns its **transcription**
-- 🖥️ Integrated the new transcription API into the frontend
-- 📜 Displayed the **transcribed text** dynamically in the UI after recording upload
-- 🧠 Now I have full flow: **record voice → upload audio → transcribe → display text**
-- 🚀 This brings the project one step closer to **real voice-based interaction**
+- 🧵 Created `/transcribe/file` endpoint on backend
+- 📤 Accepts audio, returns **transcription** via **AssemblyAI**
+- 🖥️ Integrated transcription into frontend UI
+- 📜 Now have **record voice → upload → transcribe → display text** flow
 
 ---
 
-### 🗓️ Day 7 – Voice-to-Voice with /tts/echo Endpoint 🎤🔄🎙️
+### 🗓️ Day 7 – Voice-to-Voice with `/tts/echo` 🎤🔄🎙️
 
-- 🆕 Created a new backend endpoint **`/tts/echo`** in FastAPI
-- 🎙️ This endpoint:
-  1. Accepts an **audio file** from the client
-  2. Uses **AssemblyAI** to transcribe the speech to text
-  3. Sends the transcription to **Murf AI** to generate **a new voice**
-  4. Saves the generated voice file and returns its **URL** to the client
-- 🎧 On the client side:
-  - After recording stops, the recorded audio is sent to `/tts/echo`
-  - The returned **Murf voice URL** is set as the `<audio>` source
-  - The new voice plays automatically
-- 🔄 Now we have a **full voice-to-voice pipeline**:
+- 🆕 Backend endpoint: `/tts/echo`
+- 🎙️ Flow:
 
-  **User speaks → Server transcribes → Murf re-voices → Client plays**
+  1. Accept audio → transcribe (AssemblyAI)
+  2. Send text to Murf AI → generate new voice
+  3. Return voice file URL to client
 
-- 🚀 This makes the Echo Bot truly interactive and feels like talking to a real AI agent
+- 🔄 Full voice-to-voice pipeline now works: **User speaks → Server transcribes → Murf re-voices → Client plays**
 
 ---
 
-# 🚀 Day 8 — Building LLM Query Endpoint with FastAPI
+### 🗓️ Day 8 – Building LLM Query Endpoint 🧠💬
 
-## 📅 Overview
+- 🆕 Added a brand-new backend endpoint: **`/llm/query`** in FastAPI
+- 📩 This endpoint:
 
-On **Day 8** of my Generative AI learning journey, I focused on creating a new FastAPI endpoint that accepts text input, queries an LLM (Google Gemini API), and returns an AI-generated response in JSON format.  
-This marks a key step towards integrating AI into APIs for use in chatbots, voice assistants, and other applications.
+  - Accepts a **JSON payload** containing `text` from the frontend
+  - Sends the text to **Google Gemini API**
+  - Returns the AI-generated response in **JSON format**
 
----
-
-## 🛠 Features Implemented
-
-- **POST `/llm/query` endpoint**:
-
-  - Accepts a JSON payload containing a `text` field.
-  - Passes the input to an LLM (Google Gemini API).
-  - Returns the AI's response in JSON format.
-
-- **LLM Integration**:
-
-  - Used Google’s **`gemini-1.5-flash`** model for fast response generation.
-  - Implemented error handling for model name mismatches and API issues.
-
-- **Code Modularization**:
-  - Created a `getResponseFromGemini()` helper function for cleaner code.
-  - Isolated API logic from route handling.
+- ⚡ Used the `gemini-1.5-flash` model for quick replies
+- 🛠️ Created a helper function `getResponseFromGemini()` to keep code clean
+- 🚫 Implemented error handling for API issues and model mismatches
+- 💡 This is the first step towards a **conversational AI** that can handle natural queries
 
 ---
 
-# 🎙️ Day 9 /llm/query — Audio-to-Audio AI Endpoint
+### 🗓️ Day 9 – Audio-to-Audio AI Conversation 🎤🤖🎙️
 
-## Overview
+- 🔄 Upgraded the `/llm/query` endpoint to **accept audio recordings** directly from the browser
+- 📋 New flow:
 
-The `/llm/query` endpoint accepts **audio recordings** from the client, transcribes them into text, generates a response using an **LLM API**, converts that response into speech with **Murf.ai**, and returns the audio file to be played in the browser.
+  1. User records voice in browser
+  2. Audio is sent to backend as `multipart/form-data`
+  3. **AssemblyAI** transcribes the speech into text
+  4. Transcription is sent to **Google Gemini API** for a reply
+  5. AI reply is sent to **Murf AI** for lifelike TTS output
+  6. Backend returns the generated audio to the frontend
 
-## Flow
-
-1. **Frontend:**
-
-   - User clicks "Start Recording" → audio captured via `MediaRecorder`.
-   - On "Stop Recording" → send audio file to `/llm/query`.
-
-2. **Backend:**
-
-   - Receive audio as `multipart/form-data`.
-   - Send to **AssemblyAI** for transcription.
-   - Pass transcription text to **GEMINI** for response generation.
-   - Send LLM response text to **Murf** for TTS.
-   - Return generated audio file to client.
-
-3. **Frontend Playback:**
-   - Receive audio_url from server.
-   - Create `audio` element and set `src` to blob URL.
-   - Play the response instantly.
+- 🎧 On the frontend, the new voice plays instantly after generation
+- ✨ Now the AI can **listen and talk back** without needing any text input
 
 ---
 
-# 🎙Day 10
+### 🗓️ Day 10 – Session-Based Chat Memory 🗂️🗣️
 
-## 📌 Overview
+- 🧠 Added **context awareness** so the AI remembers what was said earlier in the conversation
+- 🆕 New backend endpoint: **`/agent/chat/{session_id}`**
+- 📋 Flow:
 
-Today’s milestone: implementing **session-based chat history** so the AI assistant remembers previous conversation turns in the same session.
+  1. Accepts **audio file** from client
+  2. Transcribes it with **AssemblyAI**
+  3. Saves message into **session chat history** keyed by `session_id`
+  4. Sends **full conversation history** to Gemini for context-rich replies
+  5. Adds AI reply to session memory
+  6. Converts reply to speech with Murf AI and sends it back
 
-With this update, the assistant now maintains context between messages, resulting in more natural, relevant, and human-like responses.
-
----
-
-## 🛠 Tech Stack
-
-- **Backend**: FastAPI (Python)
-- **Speech-to-Text**: [AssemblyAI](https://www.assemblyai.com/)
-- **LLM**: Google Gemini API
-- **Text-to-Speech**: [Murf AI](https://murf.ai/)
-- **Frontend**: HTML, CSS, Vanilla JavaScript
+- 🎯 Result: **Smooth, natural, and context-aware conversations** with the AI agent
 
 ---
 
-## 🚀 Features Implemented Today
+### 🗓️ Day 11 – Robust Error Handling 🛡️⚙️
 
-- **Session Memory** – Stores conversations in an in-memory dictionary keyed by `session_id`.
-- **New API Endpoint** – `POST /agent/chat/{session_id}`:
-  1. Accepts audio file from the browser.
-  2. Transcribes speech with AssemblyAI.
-  3. Appends the user message to the session’s chat history.
-  4. Sends the full history to Gemini for context-aware replies.
-  5. Saves the assistant’s reply back to the history.
-  6. Converts the reply to speech with Murf AI.
-- **Frontend Update**:
-  - Persists `session_id` in the URL query parameter.
-  - Automatically starts recording after the AI finishes speaking for hands-free conversations.
+- 🔒 Added **try/except** blocks in FastAPI to catch backend errors
+- 🛠️ Added **try/catch** in JavaScript to show clear error messages to users
+- 📢 User now gets **friendly alerts** instead of cryptic error codes
+- 📉 Reduced app crashes during network/API failures
+- ✅ A more **reliable and user-friendly** experience overall
 
 ---
 
----
+### 🗓️ Day 12 – Conversational Agent UI Revamp 🎨🖥️
 
-## Day11
+- 🎯 Focused on **polishing the user interface** for better UX
+- ✨ Key improvements:
 
--- Error handling
+  - **One-tap recording**: Start/stop with a single button
+  - **Animated mic button**: Visual feedback while recording
+  - **Auto-play replies**: No extra clicks to hear AI’s voice
+  - **Mobile responsive design** for on-the-go testing
+  - Removed unused sections to keep UI clean and minimal
 
----
-
-# day 12 Conversational Agent — Revamped UI 🎙️
-
-A sleek, minimal, and interactive conversational agent UI for real-time voice-based communication.
-
-## 🚀 Features
-
-- **One-Tap Recording**: Combined "Start Recording" and "Stop Recording" into a single smart toggle button.
-- **Automatic Audio Playback**: Audio plays automatically once it’s loaded — no need for a player.
-- **Clean Interface**: Removed extra sections like initial TTS and echo bot content.
-- **Animated Record Button**: Added visual feedback with animation for better UX.
-- **Responsive Design**: Works seamlessly on desktop and mobile.
-
-## 📸 UI Preview
-
-![alt text](image.png)
+- 📸 Updated UI screenshot:
+  ![alt text](image.png)
+- 🚀 Now the voice agent **feels like a real app**, not just a prototype
 
 ---
 
-## ⚙️ What You’ll Need to Build This (So Far)
+## ⚙️ What You’ll Need
 
-To build your own voice agent or Echo Bot like this, you’ll need:
-
-- ✅ **FastAPI** – For serving APIs
-- ✅ **Murf AI account** – To get your TTS API key
-- ✅ **AssemblyAI / other transcription API** – For speech-to-text
-- ✅ **Browser with MediaRecorder API support** – Chrome, Firefox, etc.
-- ✅ **Basic frontend setup** – HTML, CSS, JS
-- ✅ **Python + pip** – For installing FastAPI and other packages
-- ✅ **.env file** – To store your Murf API Key securely
-- ✅ **VS Code + Live Server extension** _(optional)_ – For quick frontend preview
+- **FastAPI** (Python)
+- **Murf AI API key**
+- **AssemblyAI API key**
+- **Google Gemini API key**
+- HTML, CSS, JS frontend
+- `.env` file to store keys
 
 ---
 
@@ -236,6 +181,75 @@ To build your own voice agent or Echo Bot like this, you’ll need:
 | MediaRecorder    | Echo Bot mic capture + playback     |
 | FormData         | Uploading audio blob to the backend |
 | AssemblyAI / STT | Transcribing recorded audio         |
+| Gemini API       | AI-generated conversation           |
+
+---
+
+# 🛠 Installation & Run Instructions
+
+### 📂 Project Structure
+
+```
+├── Agent/
+│   ├── index.html
+│   ├── main.py
+│   ├── script.js
+│   ├── style.css
+├── .env
+├── requirement.txt
+├── README.md
+```
+
+---
+
+### 🔑 API Keys
+
+Create `.env` file in root:
+
+```env
+MURF_API_KEY=your_murf_api_key
+ASSEMBLY_API_KEY=your_assemblyai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+---
+
+### 📥 Installation Steps
+
+1️⃣ **Clone the repo**
+
+```bash
+git clone https://github.com/Vishalpandey1799/Murf-AI-Voice-Agent.git
+cd Murf-AI-Voice-Agent
+```
+
+2️⃣ **Create and activate virtual environment**
+
+- **Windows:**
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+- **Mac/Linux:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3️⃣ **Install dependencies**
+
+```bash
+pip install -r requirement.txt
+```
+
+4️⃣ **Run the FastAPI server**
+
+```bash
+uvicorn main:app --reload
+```
 
 ---
 
@@ -252,25 +266,3 @@ Your tools are enabling the next generation of interactive agents 💜
 Let’s build cool voice stuff together!
 
 ---
-
-## 30 Days of AI Voice Agents | Day 10: Chat History @everyone @here
-
-Today, you will be building a chat history feature so that the LLM remembers the previous messages in the conversation.
-
-The chat history will be stored in a datastore. You are free to use any prototype-friendly datastore you want. You can even use a simple in-memory dictionary that is a global variable in the python server, just make sure to run only one FastAPI worker process.
-
-Create a new endpoint POST /agent/chat/{session_id} that will accept audio as input. The session id will be used to store the chat history in the datastore. When the user sends a new message, previous messages in the session are fetched and combined with the new message to be sent to the LLM API. The response from the LLM API is then stored in the chat history and returned to the user.
-
-POST /agent/chat/{session_id} follows the same pattern as POST /llm/query on Day 9, with the addition of chat history (User query in audio -> STT -> append transcript to chat history -> LLM -> add response to chat history -> TTS -> Audio Output)
-
-Update the UI to store the session id as a query param in the URL, and also to start recording the user's voice right after an LLM response is played through to the end.
-
-You should have a complete working conversational bot by the end of this task.
-
-Have a brief conversation with your conversational bot and post the video on LinkedIn.
-
-**Instructions:**
-
-📌 Complete the task, and post on LinkedIn BEFORE 10 AM IST tomorrow.
-
-📌 Submit here after you are done: https://forms.gle/Vqkt7QguEcHybh7RA
