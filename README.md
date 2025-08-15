@@ -160,6 +160,19 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ---
 
+### 🗓️ Day 13 – Readme 🎨🖥️
+
+-- Updated Readme.md
+
+---
+
+### 🗓️ Day 14 – Folder Structure 🎨🖥️
+
+--Structured Folder setup
+-- created helper functions
+
+---
+
 ## ⚙️ What You’ll Need
 
 - **FastAPI** (Python)
@@ -190,14 +203,32 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 ### 📂 Project Structure
 
 ```
-├── Agent/
-│   ├── index.html
-│   ├── main.py
-│   ├── script.js
-│   ├── style.css
-├── .env
-├── requirement.txt
-├── README.md
+├── 📁 .git/ 🚫 (auto-hidden)
+├── 📁 .venv/ 🚫 (auto-hidden)
+├── 📁 Agent/
+│   ├── 📁 Routes/
+│   │   ├── 📁 __pycache__/ 🚫 (auto-hidden)
+│   │   └── 🐍 agent_chat.py
+│   ├── 📁 Services/
+│   │   ├── 📁 __pycache__/ 🚫 (auto-hidden)
+│   │   ├── 🐍 Gemini_service.py
+│   │   ├── 🐍 Stt_service.py
+│   │   └── 🐍 Tts_service.py
+│   ├── 📁 __pycache__/ 🚫 (auto-hidden)
+│   ├── 📁 utils/
+│   │   ├── 📁 __pycache__/ 🚫 (auto-hidden)
+│   │   └── 🐍 logging.py
+│   ├── 🌐 index.html
+│   ├── 🐍 main.py
+│   ├── 📄 script.js
+│   ├── 🎨 style.css
+│   └── 📄 tempCodeRunnerFile.js
+├── 🔒 .env 🚫 (auto-hidden)
+├── 🚫 .gitignore
+├── 📖 README.md
+├── 📄 Requirement.txt
+└── 🖼️ image.png
+
 ```
 
 ---
