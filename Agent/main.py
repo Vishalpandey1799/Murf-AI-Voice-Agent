@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
 from Routes import agent_chat
 from utils.logging import setup_logger
@@ -23,6 +23,19 @@ def get_style():
 @app.get("/script.js")
 def get_script():
     return FileResponse("script.js", media_type="application/javascript")
+
+
+ # WebSocket endpoint
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo: {data}")
+    except Exception as e:
+        print(f"WebSocket connection closed: {e}")
 
 
 # Include API routes

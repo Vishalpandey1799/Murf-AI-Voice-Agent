@@ -172,6 +172,13 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 -- created helper functions
 
 ---
+### 🗓️ Day 15 – Websockets 🎨🖥️
+
+-- Today i created a endpoint /ws
+-- checked it on postman
+-- and it's working
+
+---
 
 ## ⚙️ What You’ll Need
 
