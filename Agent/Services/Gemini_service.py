@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 my_api_key = os.getenv(
-    "GEMINI_API_KEY")
+    "GEMINI_API_KEY") 
 genai.configure(api_key=my_api_key)
 
 

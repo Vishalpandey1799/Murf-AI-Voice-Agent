@@ -3,7 +3,7 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-aai.settings.api_key = os.getenv("ASSEMBLY_API_KEY")
+aai.settings.api_key = os.getenv("ASSEMBLY_API_KEY")  
 
 
 def transcribe_audio(audio_bytes: bytes) -> str:

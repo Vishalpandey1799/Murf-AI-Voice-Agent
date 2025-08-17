@@ -8,6 +8,7 @@
         let mediaRecorder;
         let audioChunks = [];
         let stream;
+        let ws = null;
 
      
 
@@ -70,57 +71,48 @@
         }
 
       
-        startAndstopBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
+   startAndstopBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-            if (!isRecording) {
-              
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
+    if (!isRecording) {
+        try {
+            
+            ws = new WebSocket("ws://127.0.0.1:8000/ws");
 
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                            audioChunks.push(event.data);
-                        }
-                    };
+            ws.onopen = () => console.log("WebSocket connected");
+            ws.onclose = () => console.log("WebSocket closed");
+            ws.onerror = (err) => console.error("WebSocket error", err);
 
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        
-                        
-                        addAudioMessage(audioUrl, 'sent');
+           
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
 
-                      
-                        let formdata = new FormData();
-                        formdata.append("file", audioBlob, "recording.webm");
-
-                        const result = await endtoendAudio(formdata);
-
-                     
-                        if (result?.audio_url) {
-                            addAudioMessage(result.audio_url, 'received');
-                        }
-                    };
-
-                    mediaRecorder.start();
-                    isRecording = true;
-                    startAndstopBtn.textContent = "Stop Recording";
-                    startAndstopBtn.classList.add("recording");
-
-                } catch (err) {
-                    addTextMessage("Microphone access denied. Please allow microphone permissions in your browser settings.", "error");
-                    console.error(err);
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+                    ws.send(event.data);  
                 }
-            } else {
-               
-                mediaRecorder.stop();
-                stream.getTracks().forEach(track => track.stop());
-                isRecording = false;
-                startAndstopBtn.textContent = "Start Recording";
-                startAndstopBtn.classList.remove("recording");
-            }
-        });
+            };
+
+        
+            mediaRecorder.start(500);
+
+            isRecording = true;
+            startAndstopBtn.textContent = "Stop Recording";
+            startAndstopBtn.classList.add("recording");
+
+        } catch (err) {
+            console.error("Mic error", err);
+            alert("Microphone access denied.");
+        }
+    } else {
+        
+        mediaRecorder.stop();
+        stream.getTracks().forEach(track => track.stop());
+        if (ws) ws.close();
+
+        isRecording = false;
+        startAndstopBtn.textContent = "Start Recording";
+        startAndstopBtn.classList.remove("recording");
+    }
+});
  

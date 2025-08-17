@@ -168,15 +168,37 @@ I'm building a smart and interactive **voice agent** using Murf AI's powerful TT
 
 ### 🗓️ Day 14 – Folder Structure 🎨🖥️
 
---Structured Folder setup
--- created helper functions
+- Structured Folder setup
+- created helper functions
 
 ---
+
 ### 🗓️ Day 15 – Websockets 🎨🖥️
 
--- Today i created a endpoint /ws
--- checked it on postman
--- and it's working
+- Today i created a endpoint /ws
+- checked it on postman
+- and it's working
+
+---
+
+### 🗓️ Day 15 – Websockets 🎨🖥️
+
+Here’s a polished **LinkedIn post** draft for **Day 16 of your Voice Agent challenge** 👇
+
+---
+
+# 🎙️ Day 16 of 30 – Voice Agent Challenge by Murf AI
+
+🔹 **What I built**
+I implemented a system where the **client records audio and streams it live to the server** using **WebSockets**. Instead of collecting all chunks locally, the browser sends small packets of audio data to the server at regular intervals.
+
+On the **server side**, these binary audio chunks are received and saved directly into a file — no transcription, LLM, or TTS yet, just **pure audio capture and streaming**.
+
+🔹 **Why it matters**
+
+- Enables **real-time audio handling**
+- Scales better for longer recordings (no huge memory usage on client)
+- Lays the foundation for real-time features like **live transcription, voice commands, or streaming TTS** in future iterations
 
 ---
 
