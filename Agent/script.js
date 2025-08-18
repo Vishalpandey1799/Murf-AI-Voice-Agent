@@ -65,7 +65,7 @@ async function endtoendAudio(formdata) {
     }
 }
 
-/* 🔹 Convert Float32 → PCM16 */
+/* Convert Float32 → PCM16 */
 function floatTo16BitPCM(float32Array) {
     const buffer = new ArrayBuffer(float32Array.length * 2);
     const view = new DataView(buffer);
@@ -77,7 +77,7 @@ function floatTo16BitPCM(float32Array) {
     return buffer;
 }
 
-/* 🔹 Start Recording with Web Audio API */
+/*  Start Recording with Web Audio API */
 async function startRecording() {
     ws = new WebSocket("ws://127.0.0.1:8000/ws");
 
@@ -103,7 +103,7 @@ async function startRecording() {
     };
 }
 
-/* 🔹 Stop Recording */
+ 
 function stopRecording() {
     if (processor) {
         processor.disconnect();
