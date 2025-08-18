@@ -8,7 +8,7 @@ from assemblyai.streaming.v3 import (
     TerminationEvent, StreamingError
 )
 
-aai.settings.api_key = "8e9c5b4b248a4528b0734e14f02942f4"
+aai.settings.api_key = ""
 
 
 def on_begin(self, event: BeginEvent):
