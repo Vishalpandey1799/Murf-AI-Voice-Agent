@@ -1,4 +1,3 @@
- 
 const startAndstopBtn = document.getElementById('startAndstopBtn');
 const chatLog = document.getElementById('chat-log');
 const loadingIndicator = document.getElementById('loading');
@@ -22,6 +21,16 @@ function getSessionId() {
 }
 const sessionId = getSessionId();
 
+/*  Append text message to chat */
+function addTextMessage(text, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', type);
+    messageDiv.textContent = text
+    chatLog.appendChild(messageDiv);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+ 
 function addAudioMessage(audioUrl, type) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', type);
@@ -65,7 +74,7 @@ async function endtoendAudio(formdata) {
     }
 }
 
-/* 🔹 Convert Float32 → PCM16 */
+/*  Convert Float32 → PCM16 */
 function floatTo16BitPCM(float32Array) {
     const buffer = new ArrayBuffer(float32Array.length * 2);
     const view = new DataView(buffer);
@@ -77,7 +86,7 @@ function floatTo16BitPCM(float32Array) {
     return buffer;
 }
 
-/* 🔹 Start Recording with Web Audio API */
+/*  Start Recording with Web Audio API */
 async function startRecording() {
     ws = new WebSocket("ws://127.0.0.1:8000/ws");
 
@@ -85,9 +94,26 @@ async function startRecording() {
     ws.onclose = () => console.log("WebSocket closed");
     ws.onerror = (err) => console.error("WebSocket error", err);
 
+    
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            console.log(msg)
+ 
+            if (msg.type === "transcript") {
+               
+                 addTextMessage(msg.text, 'sent');
+            } else {
+                console.log("Server message:", msg);
+            }
+        } catch (err) {
+            console.error("Failed to parse server message", err, event.data);
+        }
+    };
+
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    audioCtx = new AudioContext({ sampleRate: 16000 }); // match AssemblyAI
+    audioCtx = new AudioContext({ sampleRate: 16000 }); 
     source = audioCtx.createMediaStreamSource(stream);
     processor = audioCtx.createScriptProcessor(4096, 1, 1);
 
@@ -95,7 +121,7 @@ async function startRecording() {
     processor.connect(audioCtx.destination);
 
     processor.onaudioprocess = (e) => {
-        const inputData = e.inputBuffer.getChannelData(0); // mono channel
+        const inputData = e.inputBuffer.getChannelData(0); 
         const pcm16 = floatTo16BitPCM(inputData);
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(pcm16);
@@ -103,7 +129,7 @@ async function startRecording() {
     };
 }
 
-/* 🔹 Stop Recording */
+/*  Stop Recording */
 function stopRecording() {
     if (processor) {
         processor.disconnect();
@@ -138,4 +164,3 @@ startAndstopBtn.addEventListener("click", async (e) => {
         startAndstopBtn.classList.remove("recording");
     }
 });
- 

@@ -1,9 +1,10 @@
 import os
+import asyncio
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
 from Routes import agent_chat
 from utils.logging import setup_logger
-from Routes.transcriber import AssemblyAIStreamingTranscriber   
+from Routes.transcriber import AssemblyAIStreamingTranscriber
 
 setup_logger()
 
@@ -33,31 +34,20 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("🎤 Client connected")
 
-    file_path = os.path.join(OUTPUT_DIR, "recorded_audio.webm")
-
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
- 
-    transcriber = AssemblyAIStreamingTranscriber(sample_rate=16000)
+    loop = asyncio.get_running_loop()
+    transcriber = AssemblyAIStreamingTranscriber(
+        websocket, loop, sample_rate=16000)
 
     try:
-        with open(file_path, "ab") as f:
-            while True:
-                data = await websocket.receive_bytes()
-
-               
-                f.write(data)
-
-                
-                transcriber.stream_audio(data)
+        while True:
+            data = await websocket.receive_bytes()
+            transcriber.stream_audio(data)
 
     except Exception as e:
         print(f"⚠️ WebSocket connection closed: {e}")
 
     finally:
-        transcriber.close()   
-        print(f"✅ Audio saved at {file_path}")
+        transcriber.close()
 
 
 # Include API routes

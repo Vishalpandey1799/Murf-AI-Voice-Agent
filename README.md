@@ -187,7 +187,7 @@ Here’s a polished **LinkedIn post** draft for **Day 16 of your Voice Agent cha
 
 ---
 
-# 🎙️ Day 16 of 30 – Voice Agent Challenge by Murf AI
+# 🎙️ Day 16
 
 🔹 **What I built**
 I implemented a system where the **client records audio and streams it live to the server** using **WebSockets**. Instead of collecting all chunks locally, the browser sends small packets of audio data to the server at regular intervals.
@@ -199,6 +199,51 @@ On the **server side**, these binary audio chunks are received and saved directl
 - Enables **real-time audio handling**
 - Scales better for longer recordings (no huge memory usage on client)
 - Lays the foundation for real-time features like **live transcription, voice commands, or streaming TTS** in future iterations
+
+---
+
+# 🎙️ Day 17 – Streaming Transcription with AssemblyAI
+
+## 🔹 Overview
+
+Yesterday (Day 16), I implemented **real-time audio streaming** from the client to the server using **WebSockets**.  
+Today, I extended that system by integrating **AssemblyAI’s Python SDK** to **transcribe the incoming audio stream**.
+
+Instead of only saving raw audio, the server now connects to AssemblyAI’s **Streaming API**, transcribes the audio in real time, and prints the transcription to the console (or directly on the UI).
+
+---
+
+## 🔹 What I Built
+
+1. **Client Side**
+
+   - Captures microphone input
+   - Streams audio chunks to the server via WebSockets at regular intervals
+
+2. **Server Side**
+   - Receives binary audio chunks from the client
+   - Uses **AssemblyAI’s Python SDK** to stream audio to their API
+   - Prints real-time transcription to the console (can also push to the UI)
+
+---
+
+## 🔹 Why It Matters
+
+- Converts speech → text in **real time**
+- Makes the system **interactive and dynamic**
+- Lays the foundation for **voice commands, dialogue systems, and searchable transcripts**
+
+---
+
+## 🔹 Next Steps (Day 18 Preview)
+
+AssemblyAI’s Streaming API also supports **turn detection**:
+
+- Detects when a user **stops speaking**
+- Sends a **WebSocket event to the client** signaling the end of a turn
+- Displays the **final transcription** on the UI at the end of each turn
+
+This will make the voice agent feel more **natural and conversational**.
 
 ---
 
