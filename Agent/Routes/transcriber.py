@@ -1,6 +1,10 @@
+import google.generativeai as genai
 import os
 import asyncio
 import assemblyai as aai
+
+from google import generativeai
+
 from assemblyai.streaming.v3 import (
     StreamingClient, StreamingClientOptions,
     StreamingParameters, StreamingSessionParameters,
@@ -10,6 +14,11 @@ from assemblyai.streaming.v3 import (
 from fastapi import WebSocket
 
 aai.settings.api_key = ""
+
+
+# genai.configure(api_key=)
+
+gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 class AssemblyAIStreamingTranscriber:
@@ -38,20 +47,48 @@ class AssemblyAIStreamingTranscriber:
     def on_turn(self, client, event: TurnEvent):
         print(f"{event.transcript} (end_of_turn={event.end_of_turn})")
 
-        if event.end_of_turn:
+        if event.end_of_turn and event.transcript.strip():
             try:
+
                 asyncio.run_coroutine_threadsafe(
                     self.websocket.send_json({
                         "type": "transcript",
                         "text": event.transcript
                     }),
-                    self.loop   
+                    self.loop
                 )
+
+                self.start_ai_response(event.transcript)
+
             except Exception as e:
-                print("⚠️ Failed to send transcript:", e)
+                print("⚠️ Failed in on_turn:", e)
 
             if not event.turn_is_formatted:
-                client.set_params(StreamingSessionParameters(format_turns=True))
+                client.set_params(
+                    StreamingSessionParameters(format_turns=True)
+                )
+
+    def start_ai_response(self, user_text: str):
+        """Stream AI response from Gemini and send to WebSocket"""
+        try:
+            response = gemini_model.generate_content(
+                user_text,
+                stream=True
+            )
+
+            for chunk in response:
+                if chunk.text:
+                    print(chunk.text)
+
+                    asyncio.run_coroutine_threadsafe(
+                        self.websocket.send_json({
+                            "type": "ai_response",
+                            "text": chunk.text
+                        }),
+                        self.loop
+                    )
+        except Exception as e:
+            print("⚠️ Gemini streaming error:", e)
 
     def on_termination(self, client, event: TerminationEvent):
         print(f"🛑 Session terminated after {event.audio_duration_seconds} s")
