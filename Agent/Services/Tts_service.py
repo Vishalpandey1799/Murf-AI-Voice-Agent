@@ -4,14 +4,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 MURF_API_KEY = os.getenv(
-    "MURF_API_KEY") 
+    "MURF_API_KEY")
 
 
 def generate_speech(text: str, voice_id: str = "en-US-ken") -> str:
     response = requests.post(
         "https://api.murf.ai/v1/speech/generate",
         headers={
-            "api-key": MURF_API_KEY,
+            "api-key": "",
             "Content-Type": "application/json"
         },
         json={

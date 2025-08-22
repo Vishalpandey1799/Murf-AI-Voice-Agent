@@ -1,9 +1,7 @@
 import google.generativeai as genai
-import os
 import asyncio
 import assemblyai as aai
-
-from google import generativeai
+from Services.Badmosh import MurfStreamer
 
 from assemblyai.streaming.v3 import (
     StreamingClient, StreamingClientOptions,
@@ -13,19 +11,18 @@ from assemblyai.streaming.v3 import (
 )
 from fastapi import WebSocket
 
+# AssemblyAI & Gemini setup
 aai.settings.api_key = ""
-
-
-# genai.configure(api_key=)
-
+genai.configure(api_key="")
 gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 class AssemblyAIStreamingTranscriber:
     def __init__(self, websocket: WebSocket, loop, sample_rate=16000):
+        self.murf = MurfStreamer()    
         self.websocket = websocket
-        self.loop = loop  # main FastAPI event loop
-
+        self.loop = loop
+ 
         self.client = StreamingClient(
             StreamingClientOptions(
                 api_key=aai.settings.api_key,
@@ -49,7 +46,6 @@ class AssemblyAIStreamingTranscriber:
 
         if event.end_of_turn and event.transcript.strip():
             try:
-
                 asyncio.run_coroutine_threadsafe(
                     self.websocket.send_json({
                         "type": "transcript",
@@ -57,7 +53,7 @@ class AssemblyAIStreamingTranscriber:
                     }),
                     self.loop
                 )
-
+           
                 self.start_ai_response(event.transcript)
 
             except Exception as e:
@@ -69,7 +65,7 @@ class AssemblyAIStreamingTranscriber:
                 )
 
     def start_ai_response(self, user_text: str):
-        """Stream AI response from Gemini and send to WebSocket"""
+        """Stream AI response from Gemini and send to WebSocket + Murf"""
         try:
             response = gemini_model.generate_content(
                 user_text,
@@ -80,11 +76,18 @@ class AssemblyAIStreamingTranscriber:
                 if chunk.text:
                     print(chunk.text)
 
+               
                     asyncio.run_coroutine_threadsafe(
                         self.websocket.send_json({
                             "type": "ai_response",
                             "text": chunk.text
                         }),
+                        self.loop
+                    )
+
+                 
+                    asyncio.run_coroutine_threadsafe(
+                        self.murf.stream_tts(chunk.text),
                         self.loop
                     )
         except Exception as e:
