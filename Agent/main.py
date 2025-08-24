@@ -51,4 +51,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # Include API routes
-app.include_router(agent_chat.router)
+# app.include_router(agent_chat.router)

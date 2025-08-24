@@ -4,7 +4,7 @@ import json
 import os
 
 MURF_API_KEY = os.getenv(
-    "MURF_API_KEY") or "apna key dalo yaar"
+    "MURF_API_KEY") or ""
 MURF_WS_URL = "wss://api.murf.ai/v1/speech/stream-input"
 
 
@@ -38,7 +38,7 @@ class MurfStreamer:
         # send text chunk
         text_msg = {
             "text": text,
-            "end": final   
+            "end": final
         }
         await self.ws.send(json.dumps(text_msg))
         print(
