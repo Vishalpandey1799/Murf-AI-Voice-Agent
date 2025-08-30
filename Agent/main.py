@@ -22,19 +22,22 @@ OUTPUT_DIR = os.path.join("Agent", "Output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
+BASE_DIR = os.path.dirname(__file__)  
+
+
 @app.get("/")
 def get_homepage():
-    return FileResponse("index.html", media_type="text/html")
+    return FileResponse(os.path.join(BASE_DIR, "index.html"), media_type="text/html")
 
 
 @app.get("/style.css")
 def get_style():
-    return FileResponse("style.css", media_type="text/css")
+    return FileResponse(os.path.join(BASE_DIR, "style.css"), media_type="text/css")
 
 
 @app.get("/script.js")
 def get_script():
-    return FileResponse("script.js", media_type="application/javascript")
+    return FileResponse(os.path.join(BASE_DIR, "script.js"), media_type="application/javascript")
 
 
 @app.post("/set_keys/{session_id}")
