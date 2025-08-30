@@ -1,7 +1,7 @@
 import asyncio
 import assemblyai as aai
-from Services.Badmosh import MurfStreamer
-from Services.Gemini_service import AIAgent
+from Agent.Services.Badmosh import MurfStreamer
+from Agent.Services.Gemini_service import AIAgent
 from assemblyai.streaming.v3 import (
     StreamingClient, StreamingClientOptions,
     StreamingParameters, StreamingSessionParameters,

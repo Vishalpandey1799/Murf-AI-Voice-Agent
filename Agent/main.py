@@ -4,7 +4,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from Agent.Routes.transcriber import AssemblyAIStreamingTranscriber
-from utils.logging import setup_logger
+from Agent.utils.logging import setup_logger
 
 setup_logger()
 app = FastAPI()
