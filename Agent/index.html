@@ -3,30 +3,52 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voice Agent</title>
+    <title>Voice Assistant | AI Companion</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
  
 </head>
 <body>
-   
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+    <!-- Background elements -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
 
     <div class="container">
-        <h3>Voice Agent</h3>
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h1 class="title">Voice Assistant</h1>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+
+                <div class="settings">
+        <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+      </div>
+        </div>
         
-         <div id="chat-log">
-          
+        <div id="chat-log">
+            <div class="welcome-message">
+                <h4>Hello! I'm your AI Assistant</h4>
+                <p>Press the button below to start a conversation with me</p>
+            </div>
+            
             <div class="message received">
-                <span>Press "Start Recording" to begin.</span>
+                <span>Ready when you are! Just press "Start Conversation" to begin.</span>
+                <div class="timestamp">Just now</div>
             </div>
         </div>
 
-     
         <div class="controls">
-            <button id="startAndstopBtn">Start Recording</button>
+            <button id="startAndstopBtn">
+                <i class="fas fa-microphone"></i> Start Conversation
+            </button>
             <div class="loading" id="loading">
+                <div class="loading-text">AI is thinking</div>
                 <div class="loading-dots">
                     <div class="dot"></div>
                     <div class="dot"></div>
@@ -34,10 +56,31 @@
                 </div>
             </div>
         </div>
+
+          <div id="configModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Configuration</h2>
+      <label>Gemini API Key</label>
+      <input type="password" id="geminiKey" placeholder="Enter Gemini API Key">
+      
+      <label>Murf API Key</label>
+      <input type="password" id="murfKey" placeholder="Enter Murf API Key">
+      
+      <label>STT API Key</label>
+      <input type="password" id="sttKey" placeholder="Enter STT API Key">
+      
+      <button id="saveKeysBtn">Save</button>
+    </div>
+  </div>
+        
+        <div class="footer">
+            <p>Secure & Private • Powered by AI</p>
+        </div>
     </div>
 
-
-    <script src="script.js"></script>
-    
+    <script src="script.js">
+      
+     
+    </script>
 </body>
 </html>

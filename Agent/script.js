@@ -2,18 +2,21 @@ const startAndstopBtn = document.getElementById('startAndstopBtn');
 const chatLog = document.getElementById('chat-log');
 const loadingIndicator = document.getElementById('loading');
 
+const settingsBtn = document.getElementById("settingsBtn");
+const configModal = document.getElementById("configModal");
+const saveKeysBtn = document.getElementById("saveKeysBtn");
+
 let isRecording = false;
 let ws = null;
 let stream;
 let audioCtx;
 let source;
 let processor;
-
- // state hi kehde auiooooooo ayooooooooooooooo
 let audioContext;
 let playheadTime = 0;
+let sessionKeysSet = false;
 
- 
+// ---------- Session ----------
 function getSessionId() {
     const params = new URLSearchParams(window.location.search);
     let id = params.get("session");
@@ -26,11 +29,17 @@ function getSessionId() {
 }
 const sessionId = getSessionId();
 
-// ---------- Chat UI helpers ----------
+// ---------- Chat UI ----------
 function addTextMessage(text, type) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', type);
     messageDiv.textContent = text;
+
+    const timestamp = document.createElement('div');
+    timestamp.classList.add('timestamp');
+    timestamp.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    messageDiv.appendChild(timestamp);
     chatLog.appendChild(messageDiv);
     chatLog.scrollTop = chatLog.scrollHeight;
 }
@@ -44,72 +53,31 @@ function addAudioMessage(audioUrl, type) {
     audioPlayer.src = audioUrl;
 
     messageDiv.appendChild(audioPlayer);
+
+    const timestamp = document.createElement('div');
+    timestamp.classList.add('timestamp');
+    timestamp.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    messageDiv.appendChild(timestamp);
     chatLog.appendChild(messageDiv);
 
-    if (type === 'received') {
-        audioPlayer.play();
-    }
+    if (type === 'received') audioPlayer.play();
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-async function endtoendAudio(formdata) {
-    try {
-        loadingIndicator.style.display = "flex";
-
-        const response = await fetch(`/agent/chat/${sessionId}`, {
-            method: "POST",
-            body: formdata
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Server error: ${response.status} ${errorText}`);
-        }
-
-        const data = await response.json();
-        console.log("Chat History:", data.history);
-        return data;
-
-    } catch (error) {
-        console.error("Error from transcribe to audio:", error.message);
-        addTextMessage(`Error: ${error.message}`, 'error');
-    } finally {
-        loadingIndicator.style.display = "none";
-    }
-}
-
-// ---------- Helpers ----------
-function floatTo16BitPCM(float32Array) {
-    const buffer = new ArrayBuffer(float32Array.length * 2);
-    const view = new DataView(buffer);
-    let offset = 0;
-    for (let i = 0; i < float32Array.length; i++, offset += 2) {
-        let s = Math.max(-1, Math.min(1, float32Array[i]));
-        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    }
-    return buffer;
-}
-
-// ---------- Real-time playback (fixed) ----------
+// ---------- Base64 audio → Float32 ----------
 function base64ToPCMFloat32(base64) {
     const binary = atob(base64);
     let offset = 0;
-
-    // Detect and skip WAV header if present
-    if (binary.length > 44 && binary.slice(0, 4) === "RIFF") {
-        offset = 44;
-    }
+    if (binary.length > 44 && binary.slice(0, 4) === "RIFF") offset = 44;
 
     const length = binary.length - offset;
     const byteArray = new Uint8Array(length);
-    for (let i = 0; i < length; i++) {
-        byteArray[i] = binary.charCodeAt(i + offset);
-    }
+    for (let i = 0; i < length; i++) byteArray[i] = binary.charCodeAt(i + offset);
 
     const view = new DataView(byteArray.buffer);
     const sampleCount = byteArray.length / 2;
     const float32Array = new Float32Array(sampleCount);
-
     for (let i = 0; i < sampleCount; i++) {
         const int16 = view.getInt16(i * 2, true);
         float32Array[i] = int16 / 32768;
@@ -126,7 +94,6 @@ function playAudioChunk(base64Audio) {
     const float32Array = base64ToPCMFloat32(base64Audio);
     if (!float32Array) return;
 
-    // Create audio buffer for this chunk
     const buffer = audioContext.createBuffer(1, float32Array.length, 44100);
     buffer.copyToChannel(float32Array, 0);
 
@@ -134,19 +101,33 @@ function playAudioChunk(base64Audio) {
     source.buffer = buffer;
     source.connect(audioContext.destination);
 
-    // Keep 150ms buffer headroom to absorb jitter
     const now = audioContext.currentTime;
-    if (playheadTime < now + 0.15) {
-        playheadTime = now + 0.15;
-    }
+    if (playheadTime < now + 0.15) playheadTime = now + 0.15;
 
     source.start(playheadTime);
     playheadTime += buffer.duration;
 }
 
-// ---------- Recording ----------
+// ---------- Recording helpers ----------
+function floatTo16BitPCM(float32Array) {
+    const buffer = new ArrayBuffer(float32Array.length * 2);
+    const view = new DataView(buffer);
+    let offset = 0;
+    for (let i = 0; i < float32Array.length; i++, offset += 2) {
+        let s = Math.max(-1, Math.min(1, float32Array[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return buffer;
+}
+
+// ---------- Start/Stop recording ----------
 async function startRecording() {
-    ws = new WebSocket("ws://127.0.0.1:8000/ws");
+    if (!sessionKeysSet) {
+        alert("Please configure API keys first!");
+        return;
+    }
+
+    ws = new WebSocket(`ws://127.0.0.1:8000/ws?session_id=${sessionId}`);
 
     ws.onopen = () => console.log("WebSocket connected");
     ws.onclose = () => console.log("WebSocket closed");
@@ -155,20 +136,16 @@ async function startRecording() {
     ws.onmessage = (event) => {
         try {
             const msg = JSON.parse(event.data);
-            console.log(msg);
-
-            if (msg.type === "transcript") {
+            if (msg.error) {
+                addTextMessage(msg.error, "error");
+                stopRecording();
+            } else if (msg.type === "transcript") {
                 addTextMessage(msg.text, "sent");
-
             } else if (msg.type === "ai_response") {
                 addTextMessage(msg.text, "received");
-
             } else if (msg.type === "audio_chunk") {
                 playAudioChunk(msg.audio);
-            } else {
-                console.log("Unknown message:", msg);
             }
-
         } catch (err) {
             console.error("Failed to parse server message", err, event.data);
         }
@@ -186,9 +163,7 @@ async function startRecording() {
     processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
         const pcm16 = floatTo16BitPCM(inputData);
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(pcm16);
-        }
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(pcm16);
     };
 }
 
@@ -199,21 +174,18 @@ function stopRecording() {
     }
     if (source) source.disconnect();
     if (audioCtx) audioCtx.close();
-
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
+    if (stream) stream.getTracks().forEach(track => track.stop());
     if (ws) ws.close();
 }
 
+// ---------- Button handlers ----------
 startAndstopBtn.addEventListener("click", async (e) => {
     e.preventDefault();
-
     if (!isRecording) {
         try {
             await startRecording();
             isRecording = true;
-            startAndstopBtn.textContent = "Stop Recording";
+            startAndstopBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
             startAndstopBtn.classList.add("recording");
         } catch (err) {
             console.error("Mic error", err);
@@ -222,7 +194,34 @@ startAndstopBtn.addEventListener("click", async (e) => {
     } else {
         stopRecording();
         isRecording = false;
-        startAndstopBtn.textContent = "Start Recording";
+        startAndstopBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Conversation';
         startAndstopBtn.classList.remove("recording");
+    }
+});
+
+// ---------- Settings modal ----------
+settingsBtn.addEventListener("click", () => {
+    configModal.classList.remove("hidden");
+});
+
+saveKeysBtn.addEventListener("click", async () => {
+    const keys = {
+        gemini: document.getElementById("geminiKey").value,
+        murf: document.getElementById("murfKey").value,
+        stt: document.getElementById("sttKey").value
+    };
+
+    const res = await fetch(`/set_keys/${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(keys)
+    });
+
+    if (res.ok) {
+        sessionKeysSet = true;
+        alert("Keys saved!");
+        configModal.classList.add("hidden");
+    } else {
+        alert("Failed to save keys.");
     }
 });

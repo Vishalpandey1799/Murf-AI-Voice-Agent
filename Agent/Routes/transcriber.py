@@ -2,7 +2,6 @@ import asyncio
 import assemblyai as aai
 from Services.Badmosh import MurfStreamer
 from Services.Gemini_service import AIAgent
-
 from assemblyai.streaming.v3 import (
     StreamingClient, StreamingClientOptions,
     StreamingParameters, StreamingSessionParameters,
@@ -11,17 +10,21 @@ from assemblyai.streaming.v3 import (
 )
 from fastapi import WebSocket
 
-aai.settings.api_key = ""
-
 
 class AssemblyAIStreamingTranscriber:
-    def __init__(self, websocket: WebSocket, loop, sample_rate=16000):
-        self.murf = MurfStreamer()
+    def __init__(self, websocket: WebSocket, loop, stt_key: str, gemini_key: str, murf_key: str, sample_rate=16000):
         self.websocket = websocket
         self.loop = loop
 
-        # init AI agent with Murf + WebSocket
-        self.ai_agent = AIAgent(self.websocket, self.loop, self.murf)
+        # configure AssemblyAI with provided STT key
+        aai.settings.api_key = stt_key
+
+        # init Murf with dynamic key
+        self.murf = MurfStreamer(api_key=murf_key)
+
+        # init AI agent with Gemini key + Murf + WebSocket
+        self.ai_agent = AIAgent(self.websocket, self.loop,
+                                self.murf, gemini_key)
 
         self.client = StreamingClient(
             StreamingClientOptions(
@@ -78,5 +81,5 @@ class AssemblyAIStreamingTranscriber:
     def stream_audio(self, audio_chunk: bytes):
         self.client.stream(audio_chunk)
 
-    def close(self):
+    async def close(self):
         self.client.disconnect(terminate=True)
