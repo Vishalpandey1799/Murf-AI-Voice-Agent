@@ -128,7 +128,15 @@ async function startRecording() {
     }
 
     // ws = new WebSocket(`ws://127.0.0.1:8000/ws?session_id=${sessionId}`);
-  const ws = new WebSocket(`wss://murf-ai-voice-agent-qlxm.onrender.com/ws?session_id=${sessionId}`);
+  // const ws = new WebSocket(`wss://murf-ai-voice-agent-qlxm.onrender.com/ws?session_id=${sessionId}`);
+
+    const isProd = window.location.hostname !== "localhost";
+const wsUrl = isProd 
+  ? `wss://murf-ai-voice-agent-qlxm.onrender.com/ws?session_id=${sessionId}`
+  : `ws://127.0.0.1:8000/ws?session_id=${sessionId}`;
+
+const ws = new WebSocket(wsUrl);
+
 
     ws.onopen = () => console.log("WebSocket connected");
     ws.onclose = () => console.log("WebSocket closed");
