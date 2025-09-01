@@ -127,8 +127,8 @@ async function startRecording() {
         return;
     }
 
-    // ws = new WebSocket(`ws://127.0.0.1:8000/ws?session_id=${sessionId}`);
-  // const ws = new WebSocket(`wss://murf-ai-voice-agent-qlxm.onrender.com/ws?session_id=${sessionId}`);
+    ws = new WebSocket(`ws://127.0.0.1:8000/ws?session_id=${sessionId}`);
+ 
 
     const isProd = window.location.hostname !== "localhost";
 const wsUrl = isProd 
